@@ -2,8 +2,7 @@
 
 <head>
   <title>Sorter</title>
-  <!-- TODO Add logo -->
-  <!-- <link rel="icon" href="logo.png" type="image/x-icon"> -->
+  <link rel="icon" href="sorter.png" type="image/x-icon">
   <!-- Our Styles -->
   <link rel="stylesheet" href="css/main.css">
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/head.html"></insert-html>
@@ -12,11 +11,95 @@
 <body>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/menu.html"></insert-html>
   <main class="container">
-    <!-- TODO Add body -->
+    <h1>Sorter</h1>
+    <div class="input-field col s12">
+      <select id="sort_choice">
+        <option value="" disabled selected>What're we sorting?</option>
+      </select>
+      <label>Materialize Select</label>
+    </div>
+    <div id="sorts">
+      <div id="Numbers">
+        <div class="input-field col s12">
+          <textarea id="in_numbers" class="materialize-textarea"></textarea>
+          <label>Enter text here with numbers seperated by literally anything!</label>
+        </div>
+        <p id="out_numbers">The numbers will show up sorted here</p>
+      </div>
+      <div id="Images">
+        <div class="file-field input-field col s12">
+          <div class="btn">
+            <span>Images</span>
+            <input id="in_images" type="file" multiple accept="image/*">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Upload the images here">
+          </div>
+        </div>
+        <div id="img_questions" class="row">
+          <h4>Which is better?</h4>
+          <div class="card hoverable col s6 m5 xl4">
+            <a href="#" id="img1" class="card-image"></a>
+          </div>
+          <div class="card hoverable col s6 m5 xl4 right">
+            <a href="#" id="img2" class="card-image"></a>
+          </div>
+        </div>
+        <div id="img_results" class="row">
+          <h4>Here they are sorted best to worst</h4>
+        </div>
+      </div>
+      <div id="Text">
+        <div class="row">
+          <div class="input-field col s12 m10">
+            <textarea id="in_text" class="materialize-textarea"></textarea>
+            <label>Enter your text here! (Seperate each piece of text with \\)</label>
+          </div>
+          <div class="input-field col s2 right">
+            <button id="sort_text" class="btn right">Sort</button>
+          </div>
+        </div>
+        <div id="text_questions" class="row">
+          <h4>Which is better?</h4>
+          <p id="text1" class="flow-text col s6 hoverable" style="cursor: pointer;"></p>
+          <p id="text2" class="flow-text col s6 hoverable right" style="cursor: pointer;"></p>
+        </div>
+        <div id="text_results">
+          <h4>Here they are sorted best to worst</h4>
+        </div>
+      </div>
+      <div id="Websites">
+        <div class="row">
+          <div class="input-field col s12 m10">
+            <textarea id="in_sites" class="materialize-textarea"></textarea>
+            <label>Enter the links here! Put each on a seperate line</label>
+          </div>
+          <div class="input-field col s2 right">
+            <button id="sort_sites" class="btn right">Sort</button>
+          </div>
+        </div>
+        <div id="site_questions" class="row">
+          <h4>Which is better?</h4>
+          <p class="red-text lighten-2">Note that many sites have security policies that prevent them from being displayed in IFrames and thus be displayed below</p>
+          <div>
+            <button id="site1" class="btn blue">The left one</button>
+            <button id="site2" class="btn red right">The right one</button>
+          </div>
+          <iframe id="frame1" style="width: 49%; height: 100vh;"></iframe>
+          <iframe id="frame2" class="right" style="width: 49%; height: 100vh;"></iframe>
+        </div>
+        <div id="site_results">
+          <h4>Here they are sorted best to worst</h4>
+        </div>
+      </div>
+    </div>
   </main>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/foot.html"></insert-html>
   <!-- HTML Inserts -->
   <script src="https://swag31415.github.io/Portfolio/js/html_inserts.js"></script>
+  <!-- Jquery Slim -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
   <!-- Our Scripts -->
   <script src="js/main.js"></script>
 </body>
