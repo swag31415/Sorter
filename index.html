@@ -12,96 +12,117 @@
 
 <body>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/menu.html"></insert-html>
-  <main class="container">
+  <main class="container" id="app">
     <h1>Sorter</h1>
+    <!-- Select Thing to Sort -->
     <div class="input-field col s12">
-      <select id="sort_choice">
+      <select v-model="sorting">
         <option value="" disabled selected>What're we sorting?</option>
+        <option v-for="opt in sortable" :value="opt" v-text="opt"></option>
       </select>
-      <label>Materialize Select</label>
     </div>
-    <div id="sorts">
-      <div id="Numbers">
-        <div class="input-field col s12">
-          <textarea id="in_numbers" class="materialize-textarea"></textarea>
-          <label>Enter text here with numbers seperated by literally anything!</label>
-        </div>
-        <p id="out_numbers">The numbers will show up sorted here</p>
+    <!-- Sorters -->
+    <!-- Numbers -->
+    <div v-if="sorting == 'Numbers'">
+      <div class="input-field col s12">
+        <textarea class="materialize-textarea" v-model="Numbers.text"></textarea>
+        <label>Enter text here with numbers seperated by literally anything!</label>
       </div>
-      <div id="Images">
-        <div class="file-field input-field col s12">
-          <div class="btn">
-            <span>Images</span>
-            <input id="in_images" type="file" multiple accept="image/*">
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" placeholder="Upload the images here">
-          </div>
+      <p v-if="!sorted_numbers">The numbers will show up sorted here</p>
+      <p v-if="sorted_numbers" v-text="sorted_numbers"></p>
+    </div>
+    <!-- Images -->
+    <div v-if="sorting == 'Images'">
+      <div class="file-field input-field col s12">
+        <div class="btn">
+          <span>Images</span>
+          <input type="file" multiple accept="image/*" @change="image_upload">
         </div>
-        <div id="img_questions" class="row">
-          <h4>Which is better?</h4>
-          <div class="card hoverable col s6 m5 xl4">
-            <a href="#" id="img1" class="card-image"></a>
-          </div>
-          <div class="card hoverable col s6 m5 xl4 right">
-            <a href="#" id="img2" class="card-image"></a>
-          </div>
-        </div>
-        <div id="img_results" class="row">
-          <h4>Here they are sorted best to worst</h4>
+        <div class="file-path-wrapper">
+          <input class="file-path validate" type="text" placeholder="Upload the images here">
         </div>
       </div>
-      <div id="Text">
-        <div class="row">
-          <div class="input-field col s12 m10">
-            <textarea id="in_text" class="materialize-textarea"></textarea>
-            <label>Enter your text here! (Seperate each piece of text with \\)</label>
-          </div>
-          <div class="input-field col s2 right">
-            <button id="sort_text" class="btn right">Sort</button>
-          </div>
+      <div class="row" v-if="Images.is_sorting">
+        <h4>Which is better?</h4>
+        <div class="card hoverable col s6 m5 xl4">
+          <a href="#!" class="card-image" @click="Images.left.ret()">
+            <img :src="Images.left.url"/>
+          </a>
         </div>
-        <div id="text_questions" class="row">
-          <h4>Which is better?</h4>
-          <p id="text1" class="flow-text col s6 hoverable" style="cursor: pointer;"></p>
-          <p id="text2" class="flow-text col s6 hoverable right" style="cursor: pointer;"></p>
-        </div>
-        <div id="text_results">
-          <h4>Here they are sorted best to worst</h4>
+        <div class="card hoverable col s6 m5 xl4 right">
+          <a href="#!" class="card-image" @click="Images.right.ret()">
+            <img :src="Images.right.url"/>
+          </a>
         </div>
       </div>
-      <div id="Websites">
-        <div class="row">
-          <div class="input-field col s12 m10">
-            <textarea id="in_sites" class="materialize-textarea"></textarea>
-            <label>Enter the links here! Put each on a seperate line</label>
+      <div class="row" v-if="Images.sorted_urls.length > 0">
+        <h4>Here they are sorted best to worst</h4>
+        <div v-for="url in Images.sorted_urls" class="card col s12 m6 xl4">
+          <div class="card-image">
+            <img :src="url">
           </div>
-          <div class="input-field col s2 right">
-            <button id="sort_sites" class="btn right">Sort</button>
-          </div>
-        </div>
-        <div id="site_questions" class="row">
-          <h4>Which is better?</h4>
-          <p class="red-text lighten-2">Note that many sites have security policies that prevent them from being displayed in IFrames and thus be displayed below</p>
-          <div>
-            <button id="site1" class="btn blue">The left one</button>
-            <button id="site2" class="btn red right">The right one</button>
-          </div>
-          <iframe id="frame1" style="width: 49%; height: 100vh;"></iframe>
-          <iframe id="frame2" class="right" style="width: 49%; height: 100vh;"></iframe>
-        </div>
-        <div id="site_results">
-          <h4>Here they are sorted best to worst</h4>
         </div>
       </div>
     </div>
+    <!-- Text -->
+    <div v-if="sorting == 'Text'">
+      <div class="row">
+        <div class="input-field col s12 m10">
+          <textarea class="materialize-textarea" v-model="Text.text"></textarea>
+          <label>Enter your text here! (Seperate each piece of text with \\)</label>
+        </div>
+        <div class="input-field col s2 right">
+          <button class="btn right" @click="text_sort()">Sort</button>
+        </div>
+      </div>
+      <div class="row" v-if="Text.is_sorting">
+        <h4>Which is better?</h4>
+        <p v-text="Text.left.text" @click="Text.left.ret()" class="flow-text col s6 hoverable" style="cursor: pointer;"></p>
+        <p v-text="Text.right.text" @click="Text.right.ret()" class="flow-text col s6 hoverable right" style="cursor: pointer;"></p>
+      </div>
+      <div v-if="Text.sorted_text.length > 0">
+        <h4>Here they are sorted best to worst</h4>
+        <p class="flow-text hoverable" v-text="text" v-for="text in Text.sorted_text"></p>
+      </div>
+    </div>
+    <!-- Websites -->
+    <div v-if="sorting == 'Websites'">
+      <div class="row">
+        <div class="input-field col s12 m10">
+          <textarea class="materialize-textarea" v-model="Websites.links"></textarea>
+          <label>Enter the links here! Put each on a seperate line</label>
+        </div>
+        <div class="input-field col s2 right">
+          <button class="btn right" @click="website_sort()">Sort</button>
+        </div>
+      </div>
+      <div class="row" v-if="Websites.is_sorting">
+        <h4>Which is better?</h4>
+        <p class="red-text lighten-2">Note that many sites have security policies that prevent them from being displayed
+          in IFrames and thus be displayed below</p>
+        <div>
+          <button class="btn blue" @click="Websites.left.ret()">The left one</button>
+          <button class="btn red right" @click="Websites.right.ret()">The right one</button>
+        </div>
+        <p>
+          <span v-text="Websites.left.url"></span>
+          <span v-text="Websites.right.url" class="right"></span>
+        </p>
+        <iframe :src="Websites.left.url" style="width: 49%; height: 100vh;"></iframe>
+        <iframe :src="Websites.right.url" class="right" style="width: 49%; height: 100vh;"></iframe>
+      </div>
+      <div>
+        <h4>Here they are sorted best to worst</h4>
+        <a v-for="site in Websites.sorted_sites" :href="site" v-text="site" class="flow-text hoverable" style="display: block;"></a>
+      </div>
+    </div>
+    <!-- Add more sortables here -->
   </main>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/foot.html"></insert-html>
   <!-- HTML Inserts -->
   <script src="https://swag31415.github.io/Portfolio/js/html_inserts.js"></script>
-  <!-- Jquery Slim -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-    integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+  <!-- Vue.js -->
+  <script src="https://unpkg.com/vue@3.2.37/dist/vue.global.prod.js"></script>
   <!-- Our Scripts -->
   <script src="js/main.js"></script>
 </body>

@@ -1,18 +1,3 @@
-// Turns all the sorts in #sorts into options
-let sorts = $("#sorts").children().hide()
-$("#sort_choice")
-  .append(sorts.toArray().map(v => `<option value="${v.id}">${v.id}</option>`))
-  .change(e => sorts.hide().filter((i, v) => v.id == e.target.value).show())
-
-// Number sort
-$("#in_numbers").keyup(e => {
-  nums = e.target.value.match(/-?(\d+(\.\d+)?|\.\d+)/g)
-  $("#out_numbers").text(nums ?
-    nums.sort((a, b) => a - b).reduce((a, v) => a + ", " + v) :
-    "The numbers will show up sorted here"
-  )
-})
-
 // Uses Binary search to insert. For the fg_sort
 async function bin_insert(a, e, cmp, i = 0, j = a.length - 1) {
   if (i > j) { a.splice(i, 0, e); return a }
@@ -38,85 +23,129 @@ async function fj_sort(a, cmp) {
   return sorted
 }
 
-// Reads all the images and returns a promise array of img elements
+// Reads all given images and returns a promise array of dataurls
 function read_all(images) {
   return Promise.all(
     [...images].map(v => new Promise(res => {
       const reader = new FileReader()
-      reader.onload = e => res(`<img src="${e.target.result}"/>`)
+      reader.onload = e => res(e.target.result)
       reader.readAsDataURL(v)
     }))
   )
 }
 
-// Compares two images using the user (returns a promise)
-function img_cmp(img1, img2) {
-  return new Promise(res => {
-    $("#img1").html(img1).click(() => res(true))
-    $("#img2").html(img2).click(() => res(false))
-  })
-}
-
-// Hide the image stuff before the images get selected
-$("#img_questions,#img_results").hide()
-
-// Image sort
-$("#in_images").change(e => {
-  $("#img_results").hide().children(".card").remove()
-  $("#img_questions").show()
-  read_all(e.target.files)
-    .then(v => fj_sort(v, img_cmp))
-    .then(v => {
-      $("#img_questions").hide()
-      $("#img_results").show().append(
-        v.map(v2 => `<div class="card col s12 m6 xl4"><div class="card-image">${v2}</div></div>`)
-      )
-    })
-})
-
-// Compares two texts using the user (returns a promise)
-function text_cmp(text1, text2) {
-  return new Promise(res => {
-    $("#text1").text(text1).click(() => res(true))
-    $("#text2").text(text2).click(() => res(false))
-  })
-}
-
-// Hide the text stuff before the text gets selected
-$("#text_questions,#text_results").hide()
-
-// Text Sort
-$("#sort_text").click(e => {
-  $("#text_results").hide().children("p").remove()
-  $("#text_questions").show()
-  fj_sort($("#in_text").val().split(/\s*\\\\\s*/), text_cmp)
-    .then(v => {
-      $("#text_questions").hide()
-      $("#text_results").show().append(
-        v.map(v2 => `<p class="flow-text hoverable">${v2}</p>`)
-      )
-    })
-})
-
-function site_cmp(site1, site2) {
-  return new Promise(res => {
-    $("#frame1").attr("src", site1)
-    $("#frame2").attr("src", site2)
-    $("#site1").click(() => res(true))
-    $("#site2").click(() => res(false))
-  })
-}
-
-$("#site_questions,#site_results").hide()
-
-$("#sort_sites").click(e => {
-  $("#site_results").hide().children("a").remove()
-  $("#site_questions").show()
-  fj_sort($("#in_sites").val().split("\n"), site_cmp)
-    .then(v => {
-      $("#site_questions").hide()
-      $("#site_results").show().append(
-        v.map(v2 => `<a href="${v2}" class="flow-text hoverable" style="display: block;">${v2}</a>`)
-      )
-    })
-})
+const { createApp } = Vue
+const app = createApp({
+  data() { return {
+    sortable: ['Numbers', 'Images', 'Text', 'Websites'],
+    sorting: '',
+    Numbers: {
+      text: ''
+    },
+    Images: {
+      left: {
+        url: '',
+        ret: () => {}
+      },
+      right: {
+        url: '',
+        ret: () => {}
+      },
+      is_sorting: false,
+      sorted_urls: []
+    },
+    Text: {
+      text: '',
+      left: {
+        text: '',
+        ret: () => {}
+      },
+      right: {
+        text: '',
+        ret: () => {}
+      },
+      is_sorting: false,
+      sorted_text: []
+    },
+    Websites: {
+      links: '',
+      sorted_sites: [],
+      is_sorting: false,
+      left: {
+        url: '',
+        ret: () => {}
+      },
+      right: {
+        url: '',
+        ret: () => {}
+      },
+    }
+  }},
+  computed: {
+    sorted_numbers() {
+      nums = this.Numbers.text.match(/-?(\d+(\.\d+)?|\.\d+)/g)
+      if (!nums) return ''
+      return nums.sort((a, b) => a - b).reduce((a, v) => a + ", " + v)
+    }
+  },
+  methods: {
+    async image_upload(event) {
+      urls = await read_all(event.target.files)
+      this.Images.sorted_urls = []
+      this.Images.sorted_urls = await fj_sort(urls, (a, b) => this.image_cmp(a, b))
+    },
+    image_cmp(i_left, i_right) {
+      this.Images.left.url = i_left
+      this.Images.right.url = i_right
+      this.Images.is_sorting = true
+      return new Promise(res => {
+        this.Images.left.ret = () => {
+          res(true)
+          this.Images.is_sorting = false
+        }
+        this.Images.right.ret = () => {
+          res(false)
+          this.Images.is_sorting = false
+        }
+      })
+    },
+    async text_sort() {
+      this.Text.sorted_text = []
+      this.Text.sorted_text = await fj_sort(this.Text.text.split(/\s*\\\\\s*/), (a, b) => this.text_cmp(a, b))
+    },
+    text_cmp(t_left, t_right) {
+      this.Text.left.text = t_left
+      this.Text.right.text = t_right
+      this.Text.is_sorting = true
+      return new Promise(res => {
+        this.Text.left.ret = () => {
+          res(true)
+          this.Text.is_sorting = false
+        }
+        this.Text.right.ret = () => {
+          res(false)
+          this.Text.is_sorting = false
+        }
+      })
+    },
+    async website_sort() {
+      this.Websites.sorted_sites = []
+      this.Websites.sorted_sites = await fj_sort(this.Websites.links.split('\n'), (a, b) => this.site_cmp(a, b))
+    },
+    site_cmp(s_left, s_right) {
+      this.Websites.left.url = s_left
+      this.Websites.right.url = s_right
+      this.Websites.is_sorting = true
+      return new Promise(res => {
+        this.Websites.left.ret = () => {
+          res(true)
+          this.Websites.is_sorting = false
+        }
+        this.Websites.right.ret = () => {
+          res(false)
+          this.Websites.is_sorting = false
+        }
+      })
+    }
+  }
+}).mount('#app')
