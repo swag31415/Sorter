@@ -111,7 +111,10 @@ const app = createApp({
     },
     async text_sort() {
       this.Text.sorted_text = []
-      this.Text.sorted_text = await fj_sort(this.Text.text.split(/\s*\\\\\s*/), (a, b) => this.text_cmp(a, b))
+      this.Text.sorted_text = await fj_sort(
+        this.Text.text.split(/\s*\\\\\s*/),
+        (a, b) => this.text_cmp(a, b)
+      )
     },
     text_cmp(t_left, t_right) {
       this.Text.left.text = t_left
@@ -130,11 +133,16 @@ const app = createApp({
     },
     async website_sort() {
       this.Websites.sorted_sites = []
-      this.Websites.sorted_sites = await fj_sort(this.Websites.links.split('\n'), (a, b) => this.site_cmp(a, b))
+      this.Websites.sorted_sites = await fj_sort(
+        this.Websites.links.split('\n'),
+        (a, b) => this.site_cmp(a, b)
+      )
     },
     site_cmp(s_left, s_right) {
-      this.Websites.left.url = s_left
-      this.Websites.right.url = s_right
+      exp = /youtube\.com\/watch\?v=(.*?)(?:&|$).*/gm
+      rep = 'youtube.com/embed/$1'
+      this.Websites.left.url = s_left.replace(exp, rep)
+      this.Websites.right.url = s_right.replace(exp, rep)
       this.Websites.is_sorting = true
       return new Promise(res => {
         this.Websites.left.ret = () => {
